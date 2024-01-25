@@ -42,15 +42,23 @@ class KNearestNeighbours:
         self.temperature = temperature
 
         self.train_embeddings = []
+        self.valid_embeddings = []
         self.train_labels = []
+        self.valid_labels = []
 
-    def add(self, embeddings: Tensor, labels: Tensor) -> None:
+    def add_train_samples(self, embeddings: Tensor, labels: Tensor) -> None:
         self.train_embeddings.append(embeddings)
         self.train_labels.append(labels)
 
+    def add_valid_samples(self, embeddings: Tensor, labels: Tensor) -> None:
+        self.valid_embeddings.append(embeddings)
+        self.valid_labels.append(labels)
+
     def reset(self) -> None:
         self.train_embeddings = []
+        self.valid_embeddings = []
         self.train_labels = []
+        self.valid_labels = []
 
     def score(self, embeddings: Tensor) -> Tensor:
         train_embeddings = torch.concat(self.train_embeddings)
