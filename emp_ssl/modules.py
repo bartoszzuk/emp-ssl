@@ -46,7 +46,6 @@ class PretrainModule(LightningModule):
                          nesterov=True,
                          weight_decay=self.weight_decay,
                          clip=True)
-        # optimizer = AdamW(self.model.parameters(), self.learning_rate, weight_decay=self.weight_decay)
         scheduler = CosineAnnealingLR(optimizer, self.max_epochs)
 
         return [optimizer], [scheduler]
@@ -60,27 +59,6 @@ class PretrainModule(LightningModule):
 
         total_coding_rate = losses.total_coding_rate(projections)
         cosine_similarity = losses.cosine_similarity_loss(projections)
-        #
-        # with torch.no_grad():
-        #     p, _ = batch
-        #     p = p.transpose(0, 1).chunk(self.train_patches)
-        #     p = [x.squeeze(0) for x in p]
-        #     p = torch.cat(p)
-        #
-        #     o, _ = self.model(p)
-        #     o = torch.nn.functional.normalize(o)
-        #     chunks = torch.chunk(o, self.train_patches, dim=0)
-        #
-        #     tcr = 0
-        #     for i in range(self.train_patches):
-        #         tcr += self.crit2(chunks[i])
-        #     tcr = tcr / self.train_patches
-        #
-        #     sim = self.crit1(chunks, None)
-        #
-        #     # -43.2615, -0.6371
-        #     # -43.2989, -0.6248
-        #     # -43.2989, -0.6248
 
         loss = total_coding_rate + self.invariance_coefficient * cosine_similarity
 
