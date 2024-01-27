@@ -66,7 +66,9 @@ def pretrain():
         logger=TensorBoardLogger(save_dir='logs', name=''),
         callbacks=callbacks,
         deterministic=True,
-        limit_train_batches=0.1 if config.dev else 1.0
+        check_val_every_n_epoch=config.max_epochs,
+        limit_train_batches=100 if config.dev else 1.0,
+        limit_val_batches=100 if config.dev else 1.0,
     )
 
     trainer.fit(model, datamodule=data)

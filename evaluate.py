@@ -18,7 +18,7 @@ torch.set_float32_matmul_precision('medium')
 def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', type=Path, default='embeddings')
-    parser.add_argument('--batch-size', type=int, default=1024)
+    parser.add_argument('--batch-size', type=int, default=100)
     parser.add_argument('--max-epochs', type=int, default=100)
     parser.add_argument('--num-workers', type=int, default=os.cpu_count() - 1)
     parser.add_argument('--learning-rate', type=float, default=0.03)

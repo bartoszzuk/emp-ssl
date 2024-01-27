@@ -36,8 +36,8 @@ class PretrainModule(LightningModule):
         self.valid_patches = config.valid_patches
         self.invariance_coefficient = config.invariance_coefficient
 
-        self.top1_accuracy_valid = torchmetrics.Accuracy(num_classes=10, task='multiclass', top_k=1)
-        self.top5_accuracy_valid = torchmetrics.Accuracy(num_classes=10, task='multiclass', top_k=5)
+        self.top1_accuracy = torchmetrics.Accuracy(num_classes=10, task='multiclass', top_k=1)
+        self.top5_accuracy = torchmetrics.Accuracy(num_classes=10, task='multiclass', top_k=5)
 
     def configure_optimizers(self) -> tuple[list[Optimizer], list[LRScheduler]]:
         optimizer = LARS(self.model.parameters(),
@@ -82,10 +82,10 @@ class PretrainModule(LightningModule):
         if dataloader_idx == 1:
             scores = self.knn.score(embeddings)
 
-            self.top1_accuracy_valid(scores, labels)
-            self.top5_accuracy_valid(scores, labels)
-            self.log('Valid|Top1 Accuracy', self.top1_accuracy_valid, on_epoch=True, add_dataloader_idx=False)
-            self.log('Valid|Top5 Accuracy', self.top5_accuracy_valid, on_epoch=True, add_dataloader_idx=False)
+            self.top1_accuracy(scores, labels)
+            self.top5_accuracy(scores, labels)
+            self.log('Valid|Top1 Accuracy', self.top1_accuracy, on_epoch=True, add_dataloader_idx=False)
+            self.log('Valid|Top5 Accuracy', self.top5_accuracy, on_epoch=True, add_dataloader_idx=False)
 
             # Add valid samples for embeddings dataset
             if self.current_epoch == self.max_epochs - 1:
@@ -125,8 +125,8 @@ class EvaluateModule(LightningModule):
         self.learning_rate = config.learning_rate
         self.max_epochs = config.max_epochs
 
-        self.top1_accuracy_valid = torchmetrics.Accuracy(num_classes=10, task='multiclass', top_k=1)
-        self.top5_accuracy_valid = torchmetrics.Accuracy(num_classes=10, task='multiclass', top_k=5)
+        self.top1_accuracy = torchmetrics.Accuracy(num_classes=10, task='multiclass', top_k=1)
+        self.top5_accuracy = torchmetrics.Accuracy(num_classes=10, task='multiclass', top_k=5)
 
     def configure_optimizers(self) -> tuple[list[Optimizer], list[LRScheduler]]:
         optimizer = torch.optim.SGD(self.model.parameters(),
@@ -155,9 +155,9 @@ class EvaluateModule(LightningModule):
 
         loss = torch.nn.functional.cross_entropy(logits, labels)
 
-        self.top5_accuracy_valid(scores, labels)
-        self.top1_accuracy_valid(scores, labels)
+        self.top1_accuracy(scores, labels)
+        self.top5_accuracy(scores, labels)
 
-        self.log('Valid|Top5 Accuracy', self.top5_accuracy_valid, on_epoch=True)
-        self.log('Valid|Top1 Accuracy', self.top1_accuracy_valid, on_epoch=True)
+        self.log('Valid|Top5 Accuracy', self.top5_accuracy, on_epoch=True)
+        self.log('Valid|Top1 Accuracy', self.top1_accuracy, on_epoch=True)
         self.log('Valid|Loss', loss, on_epoch=True, prog_bar=True)
