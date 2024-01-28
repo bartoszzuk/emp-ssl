@@ -23,7 +23,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument('--num-workers', type=int, default=os.cpu_count() - 1)
     parser.add_argument('--learning-rate', type=float, default=0.03)
     parser.add_argument('--weight-decay', type=float, default=5e-5)
-    parser.add_argument('--hidden-dim', type=int, default=2048)
+    parser.add_argument('--hidden-dim', type=int, default=4096)
     parser.add_argument('--seed', type=int, default=42)
     parser.add_argument('--dev', action='store_true')
 
