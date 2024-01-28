@@ -11,7 +11,7 @@ from torch.optim.lr_scheduler import LRScheduler, CosineAnnealingLR
 from emp_ssl import losses
 from emp_ssl.config import PretrainConfig, EvaluateConfig
 from emp_ssl.models import KNearestNeighbours
-from emp_ssl.optimizers import LARS, LARSWrapper
+from emp_ssl.optimizers import LARS
 
 
 class PretrainModule(LightningModule):
