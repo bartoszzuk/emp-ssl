@@ -25,7 +25,6 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument('--weight-decay', type=float, default=5e-5)
     parser.add_argument('--hidden-dim', type=int, default=4096)
     parser.add_argument('--seed', type=int, default=42)
-    parser.add_argument('--dev', action='store_true')
 
     return parser.parse_args()
 
@@ -59,8 +58,7 @@ def evaluate():
         max_epochs=config.max_epochs,
         logger=TensorBoardLogger(save_dir='evaluate-logs', name=''),
         callbacks=callbacks,
-        deterministic=True,
-        limit_train_batches=0.1 if config.dev else 1.0
+        deterministic=True
     )
 
     trainer.fit(model, datamodule=data)

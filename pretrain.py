@@ -31,7 +31,6 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument('--num-neighbours', type=int, default=20)
     parser.add_argument('--temperature', type=float, default=0.07)
     parser.add_argument('--seed', type=int, default=42)
-    parser.add_argument('--dev', action='store_true')
 
     return parser.parse_args()
 
