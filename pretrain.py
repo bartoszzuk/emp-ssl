@@ -48,7 +48,7 @@ def pretrain():
     model = PretrainModule(model, knn, config)
 
     callbacks = [
-        LearningRateMonitor(logging_interval='epoch'),
+        LearningRateMonitor(logging_interval='step'),
         ModelCheckpoint(
             monitor='Valid|Top1 Accuracy',
             save_top_k=1,
@@ -67,8 +67,7 @@ def pretrain():
         callbacks=callbacks,
         deterministic=True,
         check_val_every_n_epoch=config.max_epochs,
-        limit_train_batches=100 if config.dev else 1.0,
-        limit_val_batches=100 if config.dev else 1.0,
+        log_every_n_steps=10
     )
 
     trainer.fit(model, datamodule=data)

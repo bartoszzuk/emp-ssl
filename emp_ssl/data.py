@@ -3,7 +3,7 @@ from pathlib import Path
 
 import torch
 import torchvision.transforms.v2 as transforms
-from PIL import Image, ImageFilter
+from PIL import Image, ImageFilter, ImageOps
 from lightning import LightningDataModule
 from torch import Tensor
 from torch.utils.data import DataLoader, TensorDataset
@@ -25,6 +25,18 @@ class RandomGaussianBlur:
         return image
 
 
+class RandomSolarization:
+
+    def __init__(self, p: float) -> None:
+        self.p = p
+
+    def __call__(self, image: Image) -> Image:
+        if random.random() < self.p:
+            image = ImageOps.solarize(image)
+
+        return image
+
+
 class MultiPatchAugmentation:
 
     def __init__(self, num_patches: int) -> None:
@@ -32,12 +44,12 @@ class MultiPatchAugmentation:
         self.transform = transforms.Compose([
             transforms.RandomResizedCrop(32, scale=(0.25, 0.25), ratio=(1, 1)),
             transforms.RandomHorizontalFlip(p=0.5),
-            transforms.RandomApply([transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8),
-            transforms.RandomGrayscale(),
+            transforms.RandomApply([transforms.ColorJitter(0.4, 0.4, 0.4, 0.2)], p=0.8),
+            transforms.RandomGrayscale(p=0.2),
             RandomGaussianBlur(p=0.1),
-            transforms.RandomSolarize(0.5, p=0.2),
+            RandomSolarization(p=0.1),
             transforms.ToImage(),
-            transforms.ToDtype(torch.float32, scale=True),
+            transforms.ToDtype(torch.float32),
             transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]),
         ])
 
@@ -66,13 +78,15 @@ class PretrainDataModule(LightningDataModule):
         self.valid_source_dataset = CIFAR10(root, transform=valid_transform, download=True, train=True)
         self.valid_target_dataset = CIFAR10(root, transform=valid_transform, download=True, train=False)
 
+        self.kwargs = {'persistent_workers': True, 'pin_memory': True, 'num_workers': self.num_workers}
+
     def train_dataloader(self) -> DataLoader:
-        return DataLoader(self.train_dataset, self.train_batch_size, num_workers=self.num_workers, shuffle=True)
+        return DataLoader(self.train_dataset, self.train_batch_size, shuffle=True, **self.kwargs)
 
     def val_dataloader(self) -> list[DataLoader]:
         return [
-            DataLoader(self.valid_source_dataset, batch_size=self.valid_batch_size, num_workers=self.num_workers),
-            DataLoader(self.valid_target_dataset, batch_size=self.valid_batch_size, num_workers=self.num_workers)
+            DataLoader(self.valid_source_dataset, batch_size=self.valid_batch_size, **self.kwargs),
+            DataLoader(self.valid_target_dataset, batch_size=self.valid_batch_size, **self.kwargs)
         ]
 
 

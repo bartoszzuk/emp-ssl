@@ -5,21 +5,13 @@ import torch
 import torchmetrics
 from lightning import LightningModule
 from torch import nn, Tensor
-from torch.optim import Optimizer, AdamW
+from torch.optim import Optimizer
 from torch.optim.lr_scheduler import LRScheduler, CosineAnnealingLR
 
 from emp_ssl import losses
 from emp_ssl.config import PretrainConfig, EvaluateConfig
 from emp_ssl.models import KNearestNeighbours
-from emp_ssl.optimizers import LARS
-
-
-def unpack_patch_embeddings(embeddings: Tensor, num_patches: int) -> Tensor:
-    embeddings = torch.nn.functional.normalize(embeddings)
-    embeddings = torch.stack(embeddings.split(num_patches))
-    embeddings = torch.transpose(embeddings, 0, 1)
-
-    return embeddings
+from emp_ssl.optimizers import LARS, LARSWrapper
 
 
 class PretrainModule(LightningModule):
@@ -35,27 +27,31 @@ class PretrainModule(LightningModule):
         self.train_patches = config.train_patches
         self.valid_patches = config.valid_patches
         self.invariance_coefficient = config.invariance_coefficient
+        self.train_steps = (50000 // config.batch_size) * config.max_epochs
 
         self.top1_accuracy = torchmetrics.Accuracy(num_classes=10, task='multiclass', top_k=1)
         self.top5_accuracy = torchmetrics.Accuracy(num_classes=10, task='multiclass', top_k=5)
 
-    def configure_optimizers(self) -> tuple[list[Optimizer], list[LRScheduler]]:
+    def configure_optimizers(self) -> tuple[list[Optimizer], list[dict]]:
         optimizer = LARS(self.model.parameters(),
                          self.learning_rate,
                          momentum=0.9,
                          nesterov=True,
                          weight_decay=self.weight_decay,
                          clip=True)
-        scheduler = CosineAnnealingLR(optimizer, self.max_epochs)
+
+        scheduler = CosineAnnealingLR(optimizer, self.train_steps)
+        scheduler = {'scheduler': scheduler, 'interval': 'step'}
 
         return [optimizer], [scheduler]
 
-    def training_step(self, batch: Tensor) -> Tensor:
+    def training_step(self, batch: tuple[Tensor, Tensor]) -> Tensor:
         patches, _ = batch
         patches = torch.flatten(patches, end_dim=1)
 
         projections, _ = self.model(patches)
-        projections = unpack_patch_embeddings(projections, self.train_patches)
+        projections = torch.nn.functional.normalize(projections)
+        projections = projections.view(-1, self.train_patches, projections.size(-1))
 
         total_coding_rate = losses.total_coding_rate(projections)
         cosine_similarity = losses.cosine_similarity_loss(projections)
@@ -73,8 +69,8 @@ class PretrainModule(LightningModule):
         patches = torch.flatten(patches, end_dim=1)
 
         projections, embeddings = self.model(patches)
-        embeddings = unpack_patch_embeddings(embeddings, self.valid_patches)
-        embeddings = torch.mean(embeddings, dim=0)
+        embeddings = embeddings.view(-1, self.valid_patches, embeddings.size(-1))
+        embeddings = torch.mean(embeddings, dim=1)
 
         if dataloader_idx == 0:
             self.knn.add_train_samples(embeddings, labels)

@@ -3,8 +3,10 @@ from torch import Tensor
 
 
 def total_coding_rate(inputs: Tensor, epsilon: float = 0.2) -> Tensor:
-    batch_size = inputs.shape[1]
+    batch_size = inputs.shape[0]
     embedding_dim = inputs.shape[2]
+
+    inputs = inputs.transpose(0, 1)
 
     identity = torch.eye(embedding_dim, device=inputs.device)
     scalar = embedding_dim / (batch_size * epsilon)
@@ -18,6 +20,7 @@ def total_coding_rate(inputs: Tensor, epsilon: float = 0.2) -> Tensor:
 
 
 def cosine_similarity_loss(inputs: Tensor) -> Tensor:
+    inputs = inputs.transpose(0, 1)
     centroid = inputs.mean(dim=0)
 
     similarity = torch.cosine_similarity(inputs, centroid, dim=-1)
