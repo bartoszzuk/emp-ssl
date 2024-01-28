@@ -66,7 +66,7 @@ class PretrainDataModule(LightningDataModule):
         super().__init__()
 
         self.train_batch_size = config.batch_size
-        self.valid_batch_size = config.batch_size
+        self.valid_batch_size = config.batch_size // 4
         self.num_workers = config.num_workers
 
         root = config.dataset
@@ -91,8 +91,8 @@ class PretrainDataModule(LightningDataModule):
 
 
 def load_embeddings_dataset(root: Path) -> TensorDataset:
-    embeddings = torch.load(root / 'embeddings.pt')
-    labels = torch.load(root / 'labels.pt')
+    embeddings = torch.load(root / 'embeddings.pt', map_location='cpu')
+    labels = torch.load(root / 'labels.pt', map_location='cpu')
 
     return TensorDataset(embeddings, labels)
 
@@ -109,10 +109,10 @@ class EvaluateDataModule(LightningDataModule):
         self.num_workers = config.num_workers
 
     def train_dataloader(self) -> DataLoader:
-        return DataLoader(self.train_dataset, self.batch_size, num_workers=0, shuffle=True)
+        return DataLoader(self.train_dataset, self.batch_size, num_workers=self.num_workers, shuffle=True)
 
     def val_dataloader(self) -> DataLoader:
-        return DataLoader(self.valid_dataset, self.batch_size, num_workers=0)
+        return DataLoader(self.valid_dataset, self.batch_size, num_workers=self.num_workers)
 
 
 
