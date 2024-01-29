@@ -82,8 +82,6 @@ python evaluate.py \
 ## Results
 
 Results for default setups in pretraining (evaluated with a weighted KNN) and linear evaluation.
-Checkout `checkpoints` directory for saved weights from both the pretrained `resnet18` as well as
-the `linear` evaluator.
 
 | Stage                      | Dataset | Top1 Accuracy | Top5 Accuracy |
 |----------------------------|---------|---------------|---------------|
