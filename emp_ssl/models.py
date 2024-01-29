@@ -6,7 +6,7 @@ from torch import nn, Tensor
 from emp_ssl.config import PretrainConfig
 
 
-class ResNet(nn.Module):
+class ResNet18(nn.Module):
 
     def __init__(self, config: PretrainConfig):
         super().__init__()

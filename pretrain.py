@@ -9,7 +9,7 @@ from lightning.pytorch.loggers import TensorBoardLogger
 
 from emp_ssl.config import PretrainConfig
 from emp_ssl.data import PretrainDataModule
-from emp_ssl.models import ResNet, KNearestNeighbours
+from emp_ssl.models import ResNet18, KNearestNeighbours
 from emp_ssl.modules import PretrainModule
 
 torch.set_float32_matmul_precision('medium')
@@ -43,7 +43,7 @@ def pretrain():
     data = PretrainDataModule(config)
     knn = KNearestNeighbours(config.num_neighbours, config.temperature)
 
-    model = ResNet(config)
+    model = ResNet18(config)
     model = PretrainModule(model, knn, config)
 
     callbacks = [
