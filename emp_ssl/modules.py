@@ -139,7 +139,7 @@ class EvaluateModule(LightningModule):
         logits = self.model(embeddings)
 
         loss = torch.nn.functional.cross_entropy(logits, labels)
-        self.log('Train|Loss', loss, on_epoch=True, prog_bar=True)
+        self.log('Train|Loss', loss, on_epoch=True, on_step=False, prog_bar=True)
 
         return loss
 
