@@ -83,7 +83,7 @@ python evaluate.py \
 
 Results for default setups in pretraining (evaluated with a weighted KNN) and linear evaluation.
 
-| Stage                      | Dataset | Top1 Accuracy | Top5 Accuracy |
+|                            | Dataset | Top1 Accuracy | Top5 Accuracy |
 |----------------------------|---------|---------------|---------------|
 | Pretrain KNN **(1 epoch)** | Cifar10 | 74.32         | 97.13         |
 | Linear Evaluate            | Cifar10 | **82.11**     | 99.15         |
