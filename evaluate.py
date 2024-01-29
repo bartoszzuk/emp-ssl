@@ -23,7 +23,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument('--num-workers', type=int, default=os.cpu_count() - 1)
     parser.add_argument('--learning-rate', type=float, default=0.03)
     parser.add_argument('--weight-decay', type=float, default=5e-5)
-    parser.add_argument('--hidden-dim', type=int, default=4096)
+    parser.add_argument('--embedding-dim', type=int, default=4096)
     parser.add_argument('--seed', type=int, default=42)
 
     return parser.parse_args()
@@ -36,7 +36,7 @@ def evaluate():
 
     data = EvaluateDataModule(config)
 
-    model = nn.Linear(config.hidden_dim, 10)
+    model = nn.Linear(config.embedding_dim, 10)
     model = EvaluateModule(model, config)
 
     callbacks = [
